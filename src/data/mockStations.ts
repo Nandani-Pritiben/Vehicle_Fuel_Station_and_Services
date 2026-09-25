@@ -1,0 +1,96 @@
+import type { Station, FuelEvDetail, ServiceRecord } from "../types";
+
+export const stations: Station[] = [
+  {
+    id: "st-001",
+    name: "Krishnanagar Fuel Point",
+    brand: "IndianOil",
+    category: "fuel_station",
+    latitude: 23.0395,
+    longitude: 72.5895,
+    address: "Krishnanagar Rd, Ahmedabad",
+    isOpenNow: true,
+    verified: true,
+  },
+  {
+    id: "st-002",
+    name: "Naroda EV Hub",
+    brand: "Tata Power EZ Charge",
+    category: "ev_charger",
+    latitude: 23.0728,
+    longitude: 72.6266,
+    address: "Naroda Rd, Ahmedabad",
+    isOpenNow: true,
+    verified: true,
+  },
+  {
+    id: "st-003",
+    name: "Sabarmati Puncture Works",
+    brand: "Local",
+    category: "puncture_shop",
+    latitude: 23.0587,
+    longitude: 72.5722,
+    address: "Sabarmati, Ahmedabad",
+    isOpenNow: false,
+    verified: false,
+  },
+  {
+    id: "st-004",
+    name: "Ashray Garage & Service",
+    brand: "Bosch Car Service",
+    category: "garage",
+    latitude: 23.0412,
+    longitude: 72.5834,
+    address: "Ashray Apartment Rd, Ahmedabad",
+    isOpenNow: true,
+    verified: true,
+  },
+  {
+    id: "st-005",
+    name: "S.G. Highway Charge Point",
+    brand: "ChargeZone",
+    category: "ev_charger",
+    latitude: 23.0304,
+    longitude: 72.5066,
+    address: "S.G. Highway, Ahmedabad",
+    isOpenNow: true,
+    verified: true,
+  },
+  {
+    id: "st-006",
+    name: "Bhagwat Petrol Pump",
+    brand: "HP",
+    category: "fuel_station",
+    latitude: 23.0455,
+    longitude: 72.5301,
+    address: "Opp. Bhagwat, S.G. Highway, Ahmedabad",
+    isOpenNow: true,
+    verified: true,
+  },
+];
+
+export const fuelEvDetails: FuelEvDetail[] = [
+  { stationId: "st-001", fuelTypes: ["petrol", "diesel"], vehicleTypes: ["two_wheeler", "four_wheeler"] },
+  {
+    stationId: "st-002",
+    fuelTypes: ["ev"],
+    vehicleTypes: ["two_wheeler", "four_wheeler"],
+    connectorTypes: ["CCS2", "Type 2"],
+    chargingSpeedKw: 60,
+  },
+  { stationId: "st-003", fuelTypes: [], vehicleTypes: ["two_wheeler", "three_wheeler", "four_wheeler"] },
+  { stationId: "st-004", fuelTypes: [], vehicleTypes: ["four_wheeler", "commercial"] },
+  {
+    stationId: "st-005",
+    fuelTypes: ["ev"],
+    vehicleTypes: ["four_wheeler"],
+    connectorTypes: ["CCS2"],
+    chargingSpeedKw: 120,
+  },
+  { stationId: "st-006", fuelTypes: ["petrol", "diesel", "cng"], vehicleTypes: ["two_wheeler", "four_wheeler", "commercial"] },
+];
+
+export const serviceRecords: ServiceRecord[] = [
+  { stationId: "st-003", services: ["Puncture Repair", "Tyre Replacement"], averageWaitMinutes: 15, rating: 4.2 },
+  { stationId: "st-004", services: ["Battery Jumpstart", "General Service", "Towing"], averageWaitMinutes: 40, rating: 4.6 },
+];
