@@ -1,57 +1,58 @@
-# RoadReady — Fuel/EV Finder Frontend
+# Roadside Finder (React + TypeScript, NestJS + TypeScript)
 
-React + TypeScript frontend for the **Roadside Assistance & Fuel/EV Finder App**.
+Finds petrol / diesel / CNG stations, EV chargers, garages and puncture shops from OpenStreetMap.
+No API keys or credit card needed.
 
-Locates fuel stations, EV chargers, puncture shops, and garages within a user-defined radius,
-filtered by fuel type, vehicle type, and brand — built as an offline-first, network-independent
-experience (see `src/utils/haversine.ts` for the local distance calculation used instead of a
-network-dependent maps API).
+    roadside-finder/
+      backend/   NestJS API  (port 3000)
+      frontend/  React + Vite (port 5173)
 
-## Tech Stack
+## 1. Create the free Supabase database (5 minutes)
+1. Sign up at supabase.com (no card needed) and click New project. Save the database password.
+2. Open SQL Editor -> New query, paste everything from `backend/supabase/schema.sql`, click Run.
+   This enables PostGIS and creates the `user_places` and `place_votes` tables.
+3. Click Connect (top of the dashboard), choose "Session pooler", copy the connection string.
+   Use the pooler string, not the "Direct connection": direct is IPv6-only and fails on many home networks.
+4. In `backend/`, copy `.env.example` to `.env` and paste the string as DATABASE_URL
+   (replace [YOUR-PASSWORD] with your real password).
 
-- React 18 + TypeScript
-- Vite
-- No external UI libraries — hand-built design system (see `src/styles/index.css`)
+## 2. Run it (needs Node.js 18 or newer - nodejs.org)
 
-## Getting Started
+Terminal 1 - API:
 
-```bash
-npm install
-npm run dev
-```
+    cd backend
+    npm install
+    npm run dev
 
-Then open the printed local URL in your browser.
+Terminal 2 - website:
 
-## Project Structure
+    cd frontend
+    npm install
+    npm run dev
 
-```
-src/
-├── components/
-│   ├── FilterBar.tsx     # Search + category/fuel/vehicle filters
-│   ├── StationCard.tsx   # Result list item
-│   ├── MapView.tsx       # Lightweight SVG map (swap for a real map SDK in production)
-│   └── DetailPanel.tsx   # Selected station detail view
-├── data/
-│   └── mockStations.ts   # Sample data matching the Stations / Fuel_EV_Details / Services schema
-├── utils/
-│   └── haversine.ts      # Offline geospatial distance calculation
-├── types.ts              # Shared TypeScript types
-├── App.tsx               # App shell, filtering logic, state
-└── main.tsx               # Entry point
-```
+Open http://localhost:5173 and press "Use my location".
+Add a place, then check Supabase -> Table Editor -> user_places: your row is there.
 
-## Data Model
+## API
+- GET  /api/places?lat&lon&radius   places near a point (OSM + user-added), sorted by distance
+- POST /api/places                  add a place {name,type,lat,lon,phone,hours,fuels,clientId}
+- POST /api/places/:id/confirm      "it is here" vote; 3 other users make it verified
 
-Mirrors the project's proposed schema:
-- **Stations** — core station info (name, brand, category, location)
-- **Fuel_EV_Details** — fuel types, vehicle compatibility, EV connector info
-- **Services** — puncture/garage services, wait times, crowdsourced ratings
+## How it works
+- The backend asks the free Overpass API for OSM data, caches each area for 1 hour, and merges user-added places.
+- User-added places and votes are stored in Supabase Postgres. Nearby search uses PostGIS (ST_DWithin on a GIST index).
+- If Supabase is unreachable, the API still returns OpenStreetMap results.
+- The frontend saves every result in the browser. If the API or internet is unreachable it lists saved places by GPS distance.
 
-In production, this data would come from the backend API (aggregating OpenStreetMap Overpass API,
-Open Charge Map API, and crowdsourced input) rather than the local mock data used here for the UI build.
+## Deploy for free
+- Backend: Render or Railway. Build `npm install && npm run build`, start `npm run prod`.
+  Add DATABASE_URL as an environment variable on the host (never commit .env).
+- Frontend: Vercel or Netlify. Root `frontend`, build `npm run build`, output `dist`,
+  env var VITE_API_URL=https://your-backend-url/api
+- Then restrict CORS in backend/src/main.ts to your frontend URL.
 
-## Next Steps
-
-- Replace `MapView`'s SVG placeholder with a real map SDK (e.g. MapLibre GL, Google Maps)
-- Wire `App.tsx` to a live API instead of `mockStations.ts`
-- Add the offline SQLite sync layer described in the project plan
+## Known limits
+- OSM lacks many small puncture shops and phone numbers; unconfirmed fuel types are labelled.
+- Offline here means saved place data. Offline map images and turn-by-turn need a mobile app (Capacitor/Flutter + MapLibre + Valhalla).
+- Row Level Security is ON with no public policies, so the Supabase REST API cannot read these tables; only your NestJS server can.
+- No login or rate limiting yet; add both before a public launch. Supabase free projects pause after a week of inactivity.
